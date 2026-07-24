@@ -25,21 +25,26 @@ const FADE_MS = 850
 
 export default function HelloIntro() {
   const [phase, setPhase] = useState<"intro" | "leaving" | "gone">("intro")
-  const phaseRef = useRef(phase)
-  phaseRef.current = phase
+  const overlayRef = useRef<HTMLDivElement>(null)
 
+  // Dismissal listeners exist only while the intro is waiting; the scroll
+  // lock below keeps the page frozen through the fade.
   useEffect(() => {
+    if (phase !== "intro") return
     if (hasSeenIntro()) {
       setPhase("gone")
       return
     }
 
+    overlayRef.current?.focus()
+
+    let dismissed = false
     const dismiss = () => {
-      if (phaseRef.current !== "intro") return
-      setPhase("leaving")
+      if (dismissed) return
+      dismissed = true
       markIntroSeen()
       window.scrollTo(0, 0)
-      window.setTimeout(() => setPhase("gone"), FADE_MS)
+      setPhase("leaving")
     }
 
     const onWheel = (e: WheelEvent) => {
@@ -65,7 +70,13 @@ export default function HelloIntro() {
       window.removeEventListener("touchmove", onTouchMove)
       window.removeEventListener("keydown", onKeyDown)
     }
-  }, [])
+  }, [phase])
+
+  useEffect(() => {
+    if (phase !== "leaving") return
+    const timeout = window.setTimeout(() => setPhase("gone"), FADE_MS)
+    return () => window.clearTimeout(timeout)
+  }, [phase])
 
   useEffect(() => {
     if (phase === "gone") return
@@ -80,8 +91,11 @@ export default function HelloIntro() {
 
   return (
     <div
+      ref={overlayRef}
+      tabIndex={-1}
       className={`hello-intro${phase === "leaving" ? " hello-intro--leaving" : ""}`}
       role="dialog"
+      aria-modal="true"
       aria-label="hello"
     >
       <svg className="hello-intro__svg" viewBox="20 15 300 160" fill="none" aria-hidden="true">
@@ -121,11 +135,12 @@ const css = `
 .hello-intro {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 9999; /* above the nav (z-index 1000) and the cursor blob */
   display: flex;
   align-items: center;
   justify-content: center;
   background: #000;
+  outline: none;
   transition: opacity ${FADE_MS}ms ease;
 }
 .hello-intro--leaving {
@@ -190,6 +205,9 @@ html[data-hello-seen] .hello-intro {
   .hello-intro__svg {
     transition: none;
     filter: none;
+  }
+  .hello-intro--leaving .hello-intro__svg {
+    transform: none;
   }
 }
 `
