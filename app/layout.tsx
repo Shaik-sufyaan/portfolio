@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Syne, Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import HelloIntro from "@/components/hello-intro"
 import "./globals.css"
 
 const syne = Syne({ subsets: ["latin"], variable: "--font-syne" })
@@ -31,14 +32,21 @@ export const metadata: Metadata = {
   },
 }
 
+const helloSeenScript = `try{if(sessionStorage.getItem("hello-intro-seen")==="1")document.documentElement.setAttribute("data-hello-seen","")}catch(e){}`
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${syne.variable} ${inter.variable}`}>
+        <script dangerouslySetInnerHTML={{ __html: helloSeenScript }} />
+        <noscript>
+          <style>{`.hello-intro{display:none}`}</style>
+        </noscript>
+        <HelloIntro />
         {children}
         <Analytics />
       </body>
