@@ -8,8 +8,9 @@ const syne = Syne({ subsets: ["latin"], variable: "--font-syne" })
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 export const metadata: Metadata = {
-  title: "VISCERA STUDIO",
-  description: "Digital artifacts that shatter the noise",
+  title: "SHAIK SUFYAAN — CTO & Builder",
+  description:
+    "Shaik Sufyaan — technical co-founder & CTO of Corply. Full-stack engineer in Atlanta building products end to end: Roomeo, AeroGrid, and more.",
   generator: "v0.app",
   icons: {
     icon: [

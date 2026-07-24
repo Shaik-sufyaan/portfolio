@@ -42,40 +42,24 @@ export default function Home() {
     }
     window.addEventListener("scroll", handleScroll)
 
-    // Simple reveal on enter (Intersection Observer)
-    const observerOptions = {
-      threshold: 0.1,
+    // Smooth scrolling for anchor links (delegated so cleanup can remove it)
+    const handleAnchorClick = (e: MouseEvent) => {
+      const anchor = (e.target as Element | null)?.closest('a[href^="#"]')
+      if (!anchor) return
+      e.preventDefault()
+      const href = anchor.getAttribute("href")
+      if (href) {
+        document.querySelector(href)?.scrollIntoView({
+          behavior: "smooth",
+        })
+      }
     }
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("active")
-        }
-      })
-    }, observerOptions)
-
-    document.querySelectorAll(".reveal-text").forEach((text) => {
-      observer.observe(text)
-    })
-
-    // Add smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-      anchor.addEventListener("click", function (e) {
-        e.preventDefault()
-        const href = (this as HTMLAnchorElement).getAttribute("href")
-        if (href) {
-          document.querySelector(href)?.scrollIntoView({
-            behavior: "smooth",
-          })
-        }
-      })
-    })
+    document.addEventListener("click", handleAnchorClick)
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove)
       window.removeEventListener("scroll", handleScroll)
-      observer.disconnect()
+      document.removeEventListener("click", handleAnchorClick)
     }
   }, [])
 
@@ -84,13 +68,13 @@ export default function Home() {
       <div className="blob" id="cursor-blob"></div>
 
       <nav>
-        <div className="logo">VISCERA ©26</div>
+        <div className="logo">SUFYAAN ©26</div>
         <ul className="nav-links">
           <li>
             <a href="#work">Work</a>
           </li>
           <li>
-            <a href="#about">Studio</a>
+            <a href="#about">About</a>
           </li>
           <li>
             <a href="#contact">Contact</a>
@@ -102,17 +86,17 @@ export default function Home() {
         {/* HERO SECTION */}
         <section id="hero">
           <img
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=1200"
-            alt="Editorial"
+            src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200"
+            alt="Circuit board macro"
             className="hero-img"
             id="hero-img"
           />
           <div className="hero-title-container container">
             <span className="huge-type parallax-text" data-speed="-2">
-              VISION
+              SHAIK
             </span>
             <span className="huge-type outline-text parallax-text" data-speed="2" style={{ paddingLeft: "200px" }}>
-              SYSTEMS
+              SUFYAAN
             </span>
           </div>
         </section>
@@ -128,7 +112,7 @@ export default function Home() {
                   marginBottom: "40px",
                 }}
               >
-                WE BUILD DIGITAL ARTIFACTS THAT SHATTER THE NOISE.
+                I BUILD PRODUCTS END TO END — AND SHIP THEM FAST.
               </h2>
               <p
                 style={{
@@ -137,8 +121,9 @@ export default function Home() {
                   color: "#888",
                 }}
               >
-                Visceral aesthetic. Technical precision. We operate at the intersection of high-fashion editorial and
-                brutalist digital architecture.
+                Technical co-founder &amp; CTO of Corply. Full-stack engineer based in Atlanta — computer science at
+                Georgia State, now computer engineering at Georgia Tech. From real-time systems and computer vision to
+                production web platforms, I own every layer: frontend, backend, infra, and the schema underneath.
               </p>
             </div>
           </div>
@@ -147,115 +132,227 @@ export default function Home() {
         {/* MARQUEE */}
         <div className="scrolling-marquee">
           <div className="marquee-inner">
-            <span className="huge-type outline-text">NEW ERA — NEW ORDER — VISCERA — BEYOND FORM — </span>
-            <span className="huge-type outline-text">NEW ERA — NEW ORDER — VISCERA — BEYOND FORM — </span>
+            <span className="huge-type outline-text">BUILD — SHIP — REPEAT — CORPLY — ATLANTA — </span>
+            <span className="huge-type outline-text">BUILD — SHIP — REPEAT — CORPLY — ATLANTA — </span>
           </div>
         </div>
 
         {/* WORK SECTION */}
         <section id="work" className="container">
-          <div className="sticky-type">ARCHIVE</div>
+          <div className="sticky-type">WORK</div>
 
-          {/* Project 1 */}
+          {/* Project 1 — Roomeo */}
           <div className="project-row">
             <div className="project-info">
-              <span style={{ fontFamily: "var(--syne)", color: "var(--accent)" }}>001 / FASHION</span>
+              <span style={{ fontFamily: "var(--syne)", color: "var(--accent)" }}>001 / FULL-STACK</span>
               <h3 className="huge-type" style={{ fontSize: "6rem", margin: "20px 0" }}>
-                NOIR
+                ROOMEO
               </h3>
               <p>
-                A deep-dive into monochromatic textures and high-contrast digital layouts for a Parisian couture house.
+                A full-stack roommate platform built solo in under 8 weeks: real-time messaging, swipe-based matching,
+                expense splitting with automated debt simplification, an event system, and a marketplace — every
+                component, service, and schema on a single database and auth system. Accepted into Georgia Tech&apos;s
+                Genesis startup incubator.
               </p>
               <div className="divider"></div>
-              <p>YEAR: 2024</p>
+              <p>SOLO BUILD — 8 WEEKS</p>
             </div>
             <div className="project-media">
               <img
-                src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=1000"
-                alt="Noir Project"
+                src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=1000"
+                alt="Roomeo — roommate platform"
                 className="project-image"
               />
               <div className="floating-label huge-type outline-text" style={{ fontSize: "8rem" }}>
-                SHADOW
+                MATCH
               </div>
             </div>
           </div>
 
-          {/* Project 2 */}
+          {/* Project 2 — Clapperboard Detection */}
           <div className="project-row" style={{ flexDirection: "row-reverse" }}>
             <div className="project-info">
-              <span style={{ fontFamily: "var(--syne)", color: "var(--accent)" }}>002 / ARCHITECTURE</span>
+              <span style={{ fontFamily: "var(--syne)", color: "var(--accent)" }}>002 / COMPUTER VISION</span>
               <h3 className="huge-type" style={{ fontSize: "6rem", margin: "20px 0" }}>
-                BRUTE
+                COCREATE
               </h3>
               <p>
-                Conceptual web experience for a structural engineering firm focused on monolithic concrete structures.
+                Real-time clapperboard detection system built on YOLOv8 — 95.48% mAP at roughly 48 FPS. Placed top 5
+                out of ~100 participants.
               </p>
               <div className="divider"></div>
-              <p>YEAR: 2023</p>
+              <p>
+                <a
+                  href="https://github.com/Shaik-sufyaan/cocreate"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: "var(--accent)", textDecoration: "none" }}
+                >
+                  GITHUB ↗
+                </a>
+              </p>
             </div>
             <div className="project-media">
               <img
-                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1000"
-                alt="Brute Project"
+                src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&q=80&w=1000"
+                alt="Cocreate — clapperboard detection"
                 className="project-image"
               />
               <div
                 className="floating-label huge-type outline-text"
                 style={{ fontSize: "8rem", right: "auto", left: "-100px" }}
               >
-                CONCRETE
+                VISION
+              </div>
+            </div>
+          </div>
+
+          {/* Project 3 — VR1 Enterprises */}
+          <div className="project-row">
+            <div className="project-info">
+              <span style={{ fontFamily: "var(--syne)", color: "var(--accent)" }}>003 / PRODUCTION WEB</span>
+              <h3 className="huge-type" style={{ fontSize: "6rem", margin: "20px 0" }}>
+                VR1
+              </h3>
+              <p>
+                Production website for VR1 Enterprises, an international teacher-recruitment company — including a
+                consultation-scheduling system optimized for SEO. Acquired 100+ users within the first month.
+              </p>
+              <div className="divider"></div>
+              <p>
+                <a
+                  href="https://www.vr1enterprises.com/"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: "var(--accent)", textDecoration: "none" }}
+                >
+                  LIVE SITE ↗
+                </a>
+              </p>
+            </div>
+            <div className="project-media">
+              <img
+                src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=1000"
+                alt="VR1 Enterprises — teacher recruitment"
+                className="project-image"
+              />
+              <div className="floating-label huge-type outline-text" style={{ fontSize: "8rem" }}>
+                GLOBAL
+              </div>
+            </div>
+          </div>
+
+          {/* Project 4 — AeroGrid */}
+          <div className="project-row" style={{ flexDirection: "row-reverse" }}>
+            <div className="project-info">
+              <span style={{ fontFamily: "var(--syne)", color: "var(--accent)" }}>004 / SPATIAL UI</span>
+              <h3 className="huge-type" style={{ fontSize: "6rem", margin: "20px 0" }}>
+                AEROGRID
+              </h3>
+              <p>
+                A 3D airspace visualization interface modeled on a NASA geofencing patent, making drone flight
+                constraints interpretable in real time.
+              </p>
+              <div className="divider"></div>
+              <p>
+                <a
+                  href="https://aero-grid.vercel.app/"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: "var(--accent)", textDecoration: "none" }}
+                >
+                  LIVE DEMO ↗
+                </a>
+              </p>
+            </div>
+            <div className="project-media">
+              <img
+                src="https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&q=80&w=1000"
+                alt="AeroGrid — 3D airspace visualization"
+                className="project-image"
+              />
+              <div
+                className="floating-label huge-type outline-text"
+                style={{ fontSize: "8rem", right: "auto", left: "-100px" }}
+              >
+                AIRSPACE
+              </div>
+            </div>
+          </div>
+
+          {/* Project 5 — Duet */}
+          <div className="project-row">
+            <div className="project-info">
+              <span style={{ fontFamily: "var(--syne)", color: "var(--accent)" }}>005 / MUSIC TECH</span>
+              <h3 className="huge-type" style={{ fontSize: "6rem", margin: "20px 0" }}>
+                DUET
+              </h3>
+              <p>
+                Chrome extension that captures musical notes and converts them to MusicXML in real time, piping
+                structured data to Duet&apos;s composition backend. Owned the full pipeline — from browser-side capture
+                to backend ingestion — as Duet&apos;s backend developer.
+              </p>
+              <div className="divider"></div>
+              <p>NOV 2024 — FEB 2025</p>
+            </div>
+            <div className="project-media">
+              <img
+                src="https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&q=80&w=1000"
+                alt="Duet — real-time music notation"
+                className="project-image"
+              />
+              <div className="floating-label huge-type outline-text" style={{ fontSize: "8rem" }}>
+                NOTES
               </div>
             </div>
           </div>
         </section>
 
-        {/* OVERLAPPING COMPOSITION SECTION */}
-        <section>
-          <div className="container composition">
-            <div className="comp-item-1">
-              <img
-                src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=600"
-                className="comp-image"
-                alt="Layer 1"
-              />
-            </div>
-            <div className="comp-item-2">
-              <img
-                src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=800"
-                className="comp-image"
-                alt="Layer 2"
-              />
-            </div>
-            <div className="comp-item-3">
-              <div
-                style={{
-                  background: "var(--accent)",
-                  padding: "40px",
-                  color: "white",
-                }}
-              >
-                <h4 style={{ fontFamily: "var(--syne)", fontSize: "2rem" }}>LAYERED DEPTH</h4>
-                <p style={{ marginTop: "20px" }}>
-                  We believe in depth—both in meaning and in visual manifestation. Overlapping elements create a
-                  zine-like chaos that is meticulously organized.
-                </p>
+        {/* CV SECTION */}
+        <section id="cv">
+          <div className="container">
+            <div className="cv-grid">
+              <div className="cv-block">
+                <h4 className="cv-heading">EDUCATION</h4>
+                <div className="cv-item">
+                  <p className="cv-item-title">Georgia Institute of Technology</p>
+                  <p className="cv-item-sub">Computer Engineering — Jan 2026 – Dec 2027</p>
+                </div>
+                <div className="cv-item">
+                  <p className="cv-item-title">Georgia State University</p>
+                  <p className="cv-item-sub">Computer Science — Jan 2024 – Dec 2025</p>
+                </div>
               </div>
-            </div>
-            <div
-              style={{
-                position: "absolute",
-                bottom: 0,
-                right: 0,
-                width: "400px",
-                zIndex: 10,
-              }}
-            >
-              <img
-                src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=500"
-                className="comp-image"
-                alt="Layer 3"
-              />
+              <div className="cv-block">
+                <h4 className="cv-heading">EXPERIENCE</h4>
+                <div className="cv-item">
+                  <p className="cv-item-title">Corply — Co-founder &amp; CTO</p>
+                  <p className="cv-item-sub">Current</p>
+                </div>
+                <div className="cv-item">
+                  <p className="cv-item-title">Duet — Backend Developer</p>
+                  <p className="cv-item-sub">Nov 2024 – Feb 2025</p>
+                </div>
+              </div>
+              <div className="cv-block">
+                <h4 className="cv-heading">HONORS</h4>
+                <div className="cv-item">
+                  <p className="cv-item-title">Winner — AI ATL 2025</p>
+                  <p className="cv-item-sub">Drive Capital track (HeyAI)</p>
+                </div>
+                <div className="cv-item">
+                  <p className="cv-item-title">Winner — Emory Hacks 2025</p>
+                  <p className="cv-item-sub">Best use of ElevenLabs (1-2-Tree)</p>
+                </div>
+                <div className="cv-item">
+                  <p className="cv-item-title">Georgia Tech Genesis</p>
+                  <p className="cv-item-sub">Startup incubator — accepted with Roomeo</p>
+                </div>
+                <div className="cv-item">
+                  <p className="cv-item-title">CreateX</p>
+                  <p className="cv-item-sub">Georgia Tech entrepreneurship program</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -264,26 +361,23 @@ export default function Home() {
         <footer id="contact">
           <div className="container">
             <div className="footer-cta">
-              <a href="mailto:hello@viscera.studio">LET&apos;S — WORK</a>
+              <a href="mailto:sufyaan@0lumens.com">LET&apos;S — BUILD</a>
             </div>
             <div className="divider"></div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontFamily: "var(--syne)",
-                fontSize: "0.8rem",
-                textTransform: "uppercase",
-                color: "#555",
-              }}
-            >
-              <div>© 2026 VISCERA STUDIO</div>
-              <div style={{ display: "flex", gap: "30px" }}>
-                <span>INSTAGRAM</span>
-                <span>TWITTER/X</span>
-                <span>BEHANCE</span>
+            <div className="footer-meta">
+              <div>© 2026 SHAIK SUFYAAN</div>
+              <div className="footer-links">
+                <a href="https://github.com/Shaik-sufyaan" target="_blank" rel="noreferrer">
+                  GITHUB
+                </a>
+                <a href="https://x.com/sufyaan1517" target="_blank" rel="noreferrer">
+                  TWITTER/X
+                </a>
+                <a href="https://www.linkedin.com/in/shaik-mohammed-sufyaan/" target="_blank" rel="noreferrer">
+                  LINKEDIN
+                </a>
               </div>
-              <div>LOCATED IN BERLIN // TOKYO</div>
+              <div>LOCATED IN ATLANTA, GA</div>
             </div>
           </div>
         </footer>
