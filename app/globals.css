@@ -254,8 +254,11 @@ nav {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5;
-  filter: grayscale(1) contrast(1.1);
-  opacity: 0.8;
+  /* The hero type sits on top of this at z-index 10. White type read fine over
+     a dark photo; black type does not — it disappears into the dark regions.
+     Brighten and fade the image into a pale field instead. */
+  filter: grayscale(1) brightness(1.25) contrast(0.95);
+  opacity: 0.55;
 }
 
 .project-row {
@@ -446,7 +449,10 @@ footer {
     padding: 20px;
     flex-direction: column;
     gap: 15px;
-    background: rgba(14, 14, 14, 0.95);
+    background: rgba(255, 255, 255, 0.95);
+    /* A solid plate and difference blending cannot coexist — the blend would
+       invert the whole bar. Opt out here and set the link color directly. */
+    mix-blend-mode: normal;
   }
 
   .logo {
@@ -459,6 +465,7 @@ footer {
 
   .nav-links a {
     font-size: 0.75rem;
+    color: var(--fg);
   }
 
   .huge-type {
@@ -615,7 +622,12 @@ footer {
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
   nav {
-    background: rgba(14, 14, 14, 0.95);
+    background: rgba(255, 255, 255, 0.95);
+    mix-blend-mode: normal;
+  }
+
+  .nav-links a {
+    color: var(--fg);
   }
 
   .blob {
