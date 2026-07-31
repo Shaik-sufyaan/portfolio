@@ -332,7 +332,7 @@ nav {
 
 footer {
   padding: 100px 0px;
-  background: rgb(0, 0, 0);
+  background: var(--surface);
 }
 
 .footer-cta {
@@ -359,7 +359,7 @@ footer {
   font-family: var(--syne);
   font-size: 0.8rem;
   text-transform: uppercase;
-  color: #888;
+  color: var(--dim);
 }
 
 .footer-links {
@@ -380,7 +380,10 @@ footer {
   position: fixed;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(255, 62, 0, 0.15) 0%, rgba(14, 14, 14, 0) 70%);
+  /* Fades to transparent WHITE, not transparent dark: Safari interpolates
+     gradients through the RGB channels, so a dark end stop leaves a gray
+     fringe on a light page. */
+  background: radial-gradient(circle, rgba(221, 51, 0, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
   border-radius: 50%;
   pointer-events: none;
   z-index: -1;
@@ -423,7 +426,7 @@ footer {
 }
 
 .cv-item-sub {
-  color: #888;
+  color: var(--dim);
   font-weight: 300;
   margin-top: 6px;
   font-size: 0.95rem;

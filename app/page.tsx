@@ -118,7 +118,7 @@ export default function Home() {
                 style={{
                   fontSize: "1.5rem",
                   fontWeight: 300,
-                  color: "#888",
+                  color: "var(--dim)",
                 }}
               >
                 Technical co-founder &amp; CTO of Corply. Full-stack engineer based in Atlanta — computer science at
