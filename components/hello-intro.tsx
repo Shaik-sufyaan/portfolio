@@ -1,8 +1,16 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import HelloMark, { WRITE_SECONDS } from "./hello-mark"
 
 const SEEN_KEY = "hello-intro-seen"
+
+const HOLD_MS = 600
+const FADE_MS = 250
+/** Safety net — see the bail timer below. */
+const MAX_INTRO_MS = WRITE_SECONDS * 1000 + 2000
+
+type Phase = "intro" | "leaving" | "gone"
 
 function hasSeenIntro() {
   try {
@@ -20,15 +28,19 @@ function markIntroSeen() {
   }
 }
 
-const DISMISS_KEYS = [" ", "Spacebar", "ArrowDown", "PageDown", "Escape"]
-const FADE_MS = 850
-
 export default function HelloIntro() {
-  const [phase, setPhase] = useState<"intro" | "leaving" | "gone">("intro")
-  const overlayRef = useRef<HTMLDivElement>(null)
+  const [phase, setPhase] = useState<Phase>("intro")
+  // Resolved after mount: reading matchMedia during render would disagree with
+  // the server-rendered HTML.
+  const [animate, setAnimate] = useState(true)
+  const holdTimer = useRef<number | undefined>(undefined)
 
-  // Dismissal listeners exist only while the intro is waiting; the scroll
-  // lock below keeps the page frozen through the fade.
+  // Functional update makes this stable and idempotent — repeated calls from
+  // several listeners firing at once collapse into one transition.
+  const dismiss = useCallback(() => {
+    setPhase((current) => (current === "intro" ? "leaving" : current))
+  }, [])
+
   useEffect(() => {
     if (phase !== "intro") return
     if (hasSeenIntro()) {
@@ -36,15 +48,8 @@ export default function HelloIntro() {
       return
     }
 
-    overlayRef.current?.focus()
-
-    let dismissed = false
-    const dismiss = () => {
-      if (dismissed) return
-      dismissed = true
-      markIntroSeen()
-      window.scrollTo(0, 0)
-      setPhase("leaving")
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setAnimate(false)
     }
 
     const onWheel = (e: WheelEvent) => {
@@ -55,25 +60,43 @@ export default function HelloIntro() {
       e.preventDefault()
       dismiss()
     }
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (DISMISS_KEYS.includes(e.key)) {
-        e.preventDefault()
-        dismiss()
-      }
-    }
 
     window.addEventListener("wheel", onWheel, { passive: false })
     window.addEventListener("touchmove", onTouchMove, { passive: false })
-    window.addEventListener("keydown", onKeyDown)
+    window.addEventListener("keydown", dismiss)
+    window.addEventListener("click", dismiss)
+
+    // If the writing never reports completion — font fetch failed, canvas
+    // context refused, tab backgrounded mid-animation — the overlay must still
+    // leave. A scroll-locked white screen is worse than a truncated animation.
+    const bail = window.setTimeout(dismiss, MAX_INTRO_MS)
+
     return () => {
       window.removeEventListener("wheel", onWheel)
       window.removeEventListener("touchmove", onTouchMove)
-      window.removeEventListener("keydown", onKeyDown)
+      window.removeEventListener("keydown", dismiss)
+      window.removeEventListener("click", dismiss)
+      window.clearTimeout(bail)
     }
-  }, [phase])
+  }, [phase, dismiss])
+
+  const handleWritten = useCallback(() => {
+    holdTimer.current = window.setTimeout(dismiss, HOLD_MS)
+  }, [dismiss])
+
+  // Reduced motion draws nothing, so onComplete never fires — hold on a timer.
+  useEffect(() => {
+    if (phase !== "intro" || animate) return
+    const timeout = window.setTimeout(dismiss, HOLD_MS)
+    return () => window.clearTimeout(timeout)
+  }, [phase, animate, dismiss])
+
+  useEffect(() => () => window.clearTimeout(holdTimer.current), [])
 
   useEffect(() => {
     if (phase !== "leaving") return
+    markIntroSeen()
+    window.scrollTo(0, 0)
     const timeout = window.setTimeout(() => setPhase("gone"), FADE_MS)
     return () => window.clearTimeout(timeout)
   }, [phase])
@@ -91,41 +114,13 @@ export default function HelloIntro() {
 
   return (
     <div
-      ref={overlayRef}
-      tabIndex={-1}
       className={`hello-intro${phase === "leaving" ? " hello-intro--leaving" : ""}`}
-      role="dialog"
-      aria-modal="true"
-      aria-label="hello"
+      // Decorative chrome that leaves on its own after ~2.6s. A focus trap and
+      // aria-modal would be right for a dialog that waits for input; here they
+      // would just put a screen reader inside a countdown.
+      aria-hidden="true"
     >
-      <svg className="hello-intro__svg" viewBox="20 15 300 160" fill="none" aria-hidden="true">
-        <path
-          pathLength={1}
-          className="hello-stroke hello-stroke--h"
-          d="M42 150 C56 146 66 128 71 100 C76 68 77 44 71 37 C66 32 60 38 60 49 C60 74 64 122 69 150 C74 128 80 103 91 99 C101 95 106 103 107 117 C108 132 108 141 111 150 C113 157 120 156 125 147"
-        />
-        <path
-          pathLength={1}
-          className="hello-stroke hello-stroke--e"
-          d="M118 150 C124 138 134 116 146 112 C156 109 162 117 157 126 C150 137 136 141 130 133 C126 127 128 142 134 150 C140 157 150 153 156 144"
-        />
-        <path
-          pathLength={1}
-          className="hello-stroke hello-stroke--l1"
-          d="M162 148 C172 140 182 112 188 78 C192 54 192 38 186 34 C180 31 176 40 177 52 C178 80 182 124 188 144 C190 151 197 153 203 146"
-        />
-        <path
-          pathLength={1}
-          className="hello-stroke hello-stroke--l2"
-          d="M204 148 C214 140 224 112 230 78 C234 54 234 38 228 34 C222 31 218 40 219 52 C220 80 224 124 230 144 C232 151 239 153 245 146"
-        />
-        <path
-          pathLength={1}
-          className="hello-stroke hello-stroke--o"
-          d="M246 146 C252 132 260 116 272 112 C284 108 294 117 294 130 C294 143 284 152 272 151 C260 150 253 141 255 130 C257 118 265 111 274 111 C281 111 288 112 295 107"
-        />
-      </svg>
-      <p className="hello-intro__hint">scroll</p>
+      <HelloMark animate={animate} onWritten={handleWritten} />
       <style>{css}</style>
     </div>
   )
@@ -139,75 +134,20 @@ const css = `
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #000;
-  outline: none;
+  background: var(--bg);
   transition: opacity ${FADE_MS}ms ease;
 }
 .hello-intro--leaving {
   opacity: 0;
   pointer-events: none;
 }
-.hello-intro__svg {
-  width: min(64vw, 420px);
-  transition: transform ${FADE_MS}ms ease;
-  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.25));
-}
-.hello-intro--leaving .hello-intro__svg {
-  transform: scale(1.06);
-}
-.hello-stroke {
-  stroke: #fff;
-  stroke-width: 8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: hello-draw 0.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-}
-.hello-stroke--h  { animation-delay: 0.15s; animation-duration: 0.65s; }
-.hello-stroke--e  { animation-delay: 0.78s; animation-duration: 0.30s; }
-.hello-stroke--l1 { animation-delay: 1.06s; animation-duration: 0.40s; }
-.hello-stroke--l2 { animation-delay: 1.44s; animation-duration: 0.40s; }
-.hello-stroke--o  { animation-delay: 1.82s; animation-duration: 0.45s; }
-@keyframes hello-draw {
-  to { stroke-dashoffset: 0; }
-}
-.hello-intro__hint {
-  position: absolute;
-  bottom: 7vh;
-  left: 0;
-  right: 0;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.55);
-  font-family: var(--font-inter), sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  opacity: 0;
-  animation: hello-hint 2.4s ease 2.5s infinite;
-}
-@keyframes hello-hint {
-  0%, 100% { opacity: 0; transform: translateY(0); }
-  50% { opacity: 1; transform: translateY(-6px); }
+/* Tegaki reads ink color and size off the container's computed style. */
+.hello-mark {
+  color: var(--fg);
+  font-size: clamp(4.5rem, 20vw, 12rem);
+  line-height: 1.15;
 }
 html[data-hello-seen] .hello-intro {
   display: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .hello-stroke {
-    animation: none;
-    stroke-dashoffset: 0;
-  }
-  .hello-intro__hint {
-    animation: none;
-    opacity: 1;
-  }
-  .hello-intro__svg {
-    transition: none;
-    filter: none;
-  }
-  .hello-intro--leaving .hello-intro__svg {
-    transform: none;
-  }
 }
 `
