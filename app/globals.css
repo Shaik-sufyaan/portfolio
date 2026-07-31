@@ -39,10 +39,15 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* Adding custom design variables from HTML */
-  --bg: #0e0e0e;
-  --fg: #ffffff;
-  --accent: #ff3e00;
-  --gray: #222222;
+  --bg: #ffffff;
+  --fg: #0e0e0e;
+  --accent: #dd3300;
+  --gray: #e6e6e6;
+  /* Muted body copy. Named --dim, not --muted: the shadcn block above already
+     declares --muted and @theme inline maps it to Tailwind's bg-muted. */
+  --dim: #6b6b6b;
+  /* Footer plate — sits just off --bg, mirroring how #000 sat under #0e0e0e. */
+  --surface: #f5f5f5;
   --syne: "Syne", sans-serif;
   --inter: "Inter", sans-serif;
 }
