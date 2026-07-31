@@ -39,10 +39,21 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* Adding custom design variables from HTML */
-  --bg: #0e0e0e;
-  --fg: #ffffff;
-  --accent: #ff3e00;
-  --gray: #222222;
+  --bg: #ffffff;
+  --fg: #0e0e0e;
+  /* Named --brand, not --accent. shadcn declares --accent above as an oklch()
+     value, and Lightning CSS hoists that into a trailing
+     @supports (color: lab(0 0 0)) block — which lands AFTER this rule and wins
+     the cascade. A custom --accent here silently resolves to shadcn's near-white
+     instead of the orange. (That is why the original #ff3e00 never rendered:
+     near-white on a near-black page just read as ordinary white text.) */
+  --brand: #dd3300;
+  --gray: #e6e6e6;
+  /* Muted body copy. Named --dim, not --muted: the shadcn block above already
+     declares --muted and @theme inline maps it to Tailwind's bg-muted. */
+  --dim: #6b6b6b;
+  /* Footer plate — sits just off --bg, mirroring how #000 sat under #0e0e0e. */
+  --surface: #f5f5f5;
   --syne: "Syne", sans-serif;
   --inter: "Inter", sans-serif;
 }
@@ -157,7 +168,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--accent);
+  background: var(--brand);
 }
 
 .huge-type {
@@ -199,6 +210,11 @@ nav {
   align-items: center;
   z-index: 1000;
   mix-blend-mode: difference;
+  /* Under difference blending, white is what renders as the inverse of the
+     backdrop — that is what keeps the nav legible over both the page and the
+     hero photo. Children must NOT inherit --fg here. The two blocks below that
+     turn blending off set this back to --fg. */
+  color: #fff;
 }
 
 .logo {
@@ -249,8 +265,11 @@ nav {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5;
-  filter: grayscale(1) contrast(1.1);
-  opacity: 0.8;
+  /* The hero type sits on top of this at z-index 10. White type read fine over
+     a dark photo; black type does not — it disappears into the dark regions.
+     Brighten and fade the image into a pale field instead. */
+  filter: grayscale(1) brightness(1.25) contrast(0.95);
+  opacity: 0.55;
 }
 
 .project-row {
@@ -327,7 +346,7 @@ nav {
 
 footer {
   padding: 100px 0px;
-  background: rgb(0, 0, 0);
+  background: var(--surface);
 }
 
 .footer-cta {
@@ -345,7 +364,7 @@ footer {
 }
 
 .footer-cta a:hover {
-  color: var(--accent);
+  color: var(--brand);
 }
 
 .footer-meta {
@@ -354,7 +373,7 @@ footer {
   font-family: var(--syne);
   font-size: 0.8rem;
   text-transform: uppercase;
-  color: #888;
+  color: var(--dim);
 }
 
 .footer-links {
@@ -375,7 +394,10 @@ footer {
   position: fixed;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(255, 62, 0, 0.15) 0%, rgba(14, 14, 14, 0) 70%);
+  /* Fades to transparent WHITE, not transparent dark: Safari interpolates
+     gradients through the RGB channels, so a dark end stop leaves a gray
+     fringe on a light page. */
+  background: radial-gradient(circle, rgba(221, 51, 0, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
   border-radius: 50%;
   pointer-events: none;
   z-index: -1;
@@ -401,7 +423,7 @@ footer {
   font-weight: 800;
   font-size: 1.2rem;
   letter-spacing: 0.1em;
-  color: var(--accent);
+  color: var(--brand);
   border-bottom: 1px solid var(--gray);
   padding-bottom: 20px;
   margin-bottom: 40px;
@@ -418,7 +440,7 @@ footer {
 }
 
 .cv-item-sub {
-  color: #888;
+  color: var(--dim);
   font-weight: 300;
   margin-top: 6px;
   font-size: 0.95rem;
@@ -438,7 +460,11 @@ footer {
     padding: 20px;
     flex-direction: column;
     gap: 15px;
-    background: rgba(14, 14, 14, 0.95);
+    background: rgba(255, 255, 255, 0.95);
+    /* A solid plate and difference blending cannot coexist — the blend would
+       invert the whole bar. Opt out here and set the colors directly. */
+    mix-blend-mode: normal;
+    color: var(--fg);
   }
 
   .logo {
@@ -451,6 +477,7 @@ footer {
 
   .nav-links a {
     font-size: 0.75rem;
+    color: var(--fg);
   }
 
   .huge-type {
@@ -607,7 +634,13 @@ footer {
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
   nav {
-    background: rgba(14, 14, 14, 0.95);
+    background: rgba(255, 255, 255, 0.95);
+    mix-blend-mode: normal;
+    color: var(--fg);
+  }
+
+  .nav-links a {
+    color: var(--fg);
   }
 
   .blob {

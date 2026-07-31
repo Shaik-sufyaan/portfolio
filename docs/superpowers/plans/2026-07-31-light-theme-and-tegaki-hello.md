@@ -606,4 +606,4 @@ git commit -m "fix: verification pass corrections"
 - `styles/globals.css` is dead — nothing imports it (`app/globals.css` is the file wired into `components.json` and `app/layout.tsx`). Left untouched.
 - The shadcn oklch `:root` / `.dark` blocks and `components/ui/*` are unused by the page. Not modified.
 - No dark-mode toggle. `next-themes` stays an unused dependency, as it already is.
-- `--accent` is declared twice in `:root` (shadcn `oklch(0.97 0 0)`, then the custom block's hex, which wins). Pre-existing; not untangled here.
+- The shadcn `--accent` and the rest of its oklch scale stay as they are. **Correction to Task 2 as written above:** the custom `--accent` does *not* win the cascade — Lightning CSS hoists shadcn's oklch values into a trailing `@supports (color: lab(0% 0 0))` block that overrides it, so the site's orange has never rendered. The custom token was renamed `--brand` during implementation. See the amendment in the design doc.
