@@ -17,19 +17,17 @@ import { TegakiRenderer } from "tegaki/react"
 export const WRITE_SECONDS = 1.8
 
 type HelloMarkProps = {
-  /** False when the visitor prefers reduced motion — renders it already written. */
-  animate: boolean
-  /** Fires once the last stroke lands. Never fires when `animate` is false. */
+  /** Fires once the last stroke lands. */
   onWritten?: () => void
 }
 
-export default function HelloMark({ animate, onWritten }: HelloMarkProps) {
+export default function HelloMark({ onWritten }: HelloMarkProps) {
   return (
     <TegakiRenderer
       className="hello-mark"
       font={parisienne}
-      time={animate ? { mode: "uncontrolled", duration: WRITE_SECONDS } : "100%"}
-      onComplete={animate ? onWritten : undefined}
+      time={{ mode: "uncontrolled", duration: WRITE_SECONDS }}
+      onComplete={onWritten}
     >
       hello
     </TegakiRenderer>

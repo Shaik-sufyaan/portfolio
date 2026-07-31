@@ -41,7 +41,13 @@
   /* Adding custom design variables from HTML */
   --bg: #ffffff;
   --fg: #0e0e0e;
-  --accent: #dd3300;
+  /* Named --brand, not --accent. shadcn declares --accent above as an oklch()
+     value, and Lightning CSS hoists that into a trailing
+     @supports (color: lab(0 0 0)) block — which lands AFTER this rule and wins
+     the cascade. A custom --accent here silently resolves to shadcn's near-white
+     instead of the orange. (That is why the original #ff3e00 never rendered:
+     near-white on a near-black page just read as ordinary white text.) */
+  --brand: #dd3300;
   --gray: #e6e6e6;
   /* Muted body copy. Named --dim, not --muted: the shadcn block above already
      declares --muted and @theme inline maps it to Tailwind's bg-muted. */
@@ -162,7 +168,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--accent);
+  background: var(--brand);
 }
 
 .huge-type {
@@ -204,6 +210,11 @@ nav {
   align-items: center;
   z-index: 1000;
   mix-blend-mode: difference;
+  /* Under difference blending, white is what renders as the inverse of the
+     backdrop — that is what keeps the nav legible over both the page and the
+     hero photo. Children must NOT inherit --fg here. The two blocks below that
+     turn blending off set this back to --fg. */
+  color: #fff;
 }
 
 .logo {
@@ -353,7 +364,7 @@ footer {
 }
 
 .footer-cta a:hover {
-  color: var(--accent);
+  color: var(--brand);
 }
 
 .footer-meta {
@@ -412,7 +423,7 @@ footer {
   font-weight: 800;
   font-size: 1.2rem;
   letter-spacing: 0.1em;
-  color: var(--accent);
+  color: var(--brand);
   border-bottom: 1px solid var(--gray);
   padding-bottom: 20px;
   margin-bottom: 40px;
@@ -451,8 +462,9 @@ footer {
     gap: 15px;
     background: rgba(255, 255, 255, 0.95);
     /* A solid plate and difference blending cannot coexist — the blend would
-       invert the whole bar. Opt out here and set the link color directly. */
+       invert the whole bar. Opt out here and set the colors directly. */
     mix-blend-mode: normal;
+    color: var(--fg);
   }
 
   .logo {
@@ -624,6 +636,7 @@ footer {
   nav {
     background: rgba(255, 255, 255, 0.95);
     mix-blend-mode: normal;
+    color: var(--fg);
   }
 
   .nav-links a {

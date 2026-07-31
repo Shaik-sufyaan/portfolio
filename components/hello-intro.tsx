@@ -30,9 +30,6 @@ function markIntroSeen() {
 
 export default function HelloIntro() {
   const [phase, setPhase] = useState<Phase>("intro")
-  // Resolved after mount: reading matchMedia during render would disagree with
-  // the server-rendered HTML.
-  const [animate, setAnimate] = useState(true)
   const holdTimer = useRef<number | undefined>(undefined)
 
   // Functional update makes this stable and idempotent — repeated calls from
@@ -43,13 +40,14 @@ export default function HelloIntro() {
 
   useEffect(() => {
     if (phase !== "intro") return
-    if (hasSeenIntro()) {
+    // The intro is, in its entirety, an animation, so someone who asked for
+    // less motion gets the site instead. A "static" version is not a real
+    // option: the mark cannot paint until the font bundle resolves (~0.5s), so
+    // holding a still frame would flash the word on screen and immediately
+    // fade it — worse than never showing it.
+    if (hasSeenIntro() || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setPhase("gone")
       return
-    }
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setAnimate(false)
     }
 
     const onWheel = (e: WheelEvent) => {
@@ -84,13 +82,6 @@ export default function HelloIntro() {
     holdTimer.current = window.setTimeout(dismiss, HOLD_MS)
   }, [dismiss])
 
-  // Reduced motion draws nothing, so onComplete never fires — hold on a timer.
-  useEffect(() => {
-    if (phase !== "intro" || animate) return
-    const timeout = window.setTimeout(dismiss, HOLD_MS)
-    return () => window.clearTimeout(timeout)
-  }, [phase, animate, dismiss])
-
   useEffect(() => () => window.clearTimeout(holdTimer.current), [])
 
   useEffect(() => {
@@ -120,7 +111,7 @@ export default function HelloIntro() {
       // would just put a screen reader inside a countdown.
       aria-hidden="true"
     >
-      <HelloMark animate={animate} onWritten={handleWritten} />
+      <HelloMark onWritten={handleWritten} />
       <style>{css}</style>
     </div>
   )
@@ -149,5 +140,12 @@ const css = `
 }
 html[data-hello-seen] .hello-intro {
   display: none;
+}
+/* The component bails on mount, but this covers the window before React runs
+   and the case where it never does. */
+@media (prefers-reduced-motion: reduce) {
+  .hello-intro {
+    display: none;
+  }
 }
 `

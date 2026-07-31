@@ -144,7 +144,7 @@ export default function Home() {
           {/* Project 1 — Roomeo */}
           <div className="project-row">
             <div className="project-info">
-              <span style={{ fontFamily: "var(--syne)", color: "var(--accent)" }}>001 / FULL-STACK</span>
+              <span style={{ fontFamily: "var(--syne)", color: "var(--brand)" }}>001 / FULL-STACK</span>
               <h3 className="huge-type" style={{ fontSize: "6rem", margin: "20px 0" }}>
                 ROOMEO
               </h3>
@@ -172,7 +172,7 @@ export default function Home() {
           {/* Project 2 — Clapperboard Detection */}
           <div className="project-row" style={{ flexDirection: "row-reverse" }}>
             <div className="project-info">
-              <span style={{ fontFamily: "var(--syne)", color: "var(--accent)" }}>002 / COMPUTER VISION</span>
+              <span style={{ fontFamily: "var(--syne)", color: "var(--brand)" }}>002 / COMPUTER VISION</span>
               <h3 className="huge-type" style={{ fontSize: "6rem", margin: "20px 0" }}>
                 COCREATE
               </h3>
@@ -186,7 +186,7 @@ export default function Home() {
                   href="https://github.com/Shaik-sufyaan/cocreate"
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: "var(--accent)", textDecoration: "none" }}
+                  style={{ color: "var(--brand)", textDecoration: "none" }}
                 >
                   GITHUB ↗
                 </a>
@@ -210,7 +210,7 @@ export default function Home() {
           {/* Project 3 — VR1 Enterprises */}
           <div className="project-row">
             <div className="project-info">
-              <span style={{ fontFamily: "var(--syne)", color: "var(--accent)" }}>003 / PRODUCTION WEB</span>
+              <span style={{ fontFamily: "var(--syne)", color: "var(--brand)" }}>003 / PRODUCTION WEB</span>
               <h3 className="huge-type" style={{ fontSize: "6rem", margin: "20px 0" }}>
                 VR1
               </h3>
@@ -224,7 +224,7 @@ export default function Home() {
                   href="https://www.vr1enterprises.com/"
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: "var(--accent)", textDecoration: "none" }}
+                  style={{ color: "var(--brand)", textDecoration: "none" }}
                 >
                   LIVE SITE ↗
                 </a>
@@ -245,7 +245,7 @@ export default function Home() {
           {/* Project 4 — AeroGrid */}
           <div className="project-row" style={{ flexDirection: "row-reverse" }}>
             <div className="project-info">
-              <span style={{ fontFamily: "var(--syne)", color: "var(--accent)" }}>004 / SPATIAL UI</span>
+              <span style={{ fontFamily: "var(--syne)", color: "var(--brand)" }}>004 / SPATIAL UI</span>
               <h3 className="huge-type" style={{ fontSize: "6rem", margin: "20px 0" }}>
                 AEROGRID
               </h3>
@@ -259,7 +259,7 @@ export default function Home() {
                   href="https://aero-grid.vercel.app/"
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: "var(--accent)", textDecoration: "none" }}
+                  style={{ color: "var(--brand)", textDecoration: "none" }}
                 >
                   LIVE DEMO ↗
                 </a>
@@ -283,7 +283,7 @@ export default function Home() {
           {/* Project 5 — Duet */}
           <div className="project-row">
             <div className="project-info">
-              <span style={{ fontFamily: "var(--syne)", color: "var(--accent)" }}>005 / MUSIC TECH</span>
+              <span style={{ fontFamily: "var(--syne)", color: "var(--brand)" }}>005 / MUSIC TECH</span>
               <h3 className="huge-type" style={{ fontSize: "6rem", margin: "20px 0" }}>
                 DUET
               </h3>

@@ -68,16 +68,35 @@ for, and `next-themes` staying unused is fine).
 Named `--dim`, not `--muted`: the shadcn block above already declares `--muted`
 and `@theme inline` maps it to Tailwind's `bg-muted`. A second `--muted` in the
 custom block would silently override it.
-| `--accent` | `#ff3e00` | `#dd3300` | 4.6:1 on white |
+| `--brand` | `--accent: #ff3e00` | `#dd3300` | 4.6:1 on white; **renamed** — see below |
 
 The shadcn `:root` / `.dark` oklch blocks above it are left alone — no component
 in the site uses them, and `--background`/`--foreground` are consumed only by the
 unused `components/ui/*` set.
 
-**Note:** `--accent` is declared twice in `:root` today — once in the shadcn
-block as `oklch(0.97 0 0)` and again in the custom block as `#ff3e00`. The
-second wins. This is pre-existing and stays as-is; only the custom-block value
-changes.
+### Amendment (found during implementation): the accent was never rendering
+
+The original plan assumed the custom-block `--accent: #ff3e00` won over the
+shadcn `--accent: oklch(0.97 0 0)` declared earlier in the same `:root`, on
+plain "later declaration wins" grounds. **It does not.** Reading the compiled
+stylesheet in the browser shows Lightning CSS splits the oklch values into a
+trailing progressive-enhancement block:
+
+```
+:root                                     --accent: #d30
+@supports (color: lab(0% 0 0)) > :root    --accent: lab(96.52% …)   ← wins
+```
+
+The `@supports` block is emitted after the plain rule, so in any browser with
+`lab()` support the shadcn near-white wins. The site's orange accent has
+therefore never actually rendered — on a near-black background a near-white
+accent simply read as ordinary white text, so it went unnoticed. Flipping to
+white would have made the project numbers, CV headings, and every project link
+invisible.
+
+Fix: the custom token is renamed `--brand`, for the same collision-avoidance
+reason as `--dim`. `@theme inline`'s `--color-accent: var(--accent)` is left
+pointing at shadcn's own value, which is what it is meant to reference.
 
 Hardcoded colors to replace:
 
@@ -108,6 +127,13 @@ grayscale → color hover still works on white.
 `color: white`. Difference-blending white renders as the inverse of whatever is
 behind it, so on a white page the links resolve to black automatically. **Both
 declarations stay exactly as they are.**
+
+*Amendment (found during implementation):* the `.logo` had no color of its own
+and inherited `--fg`. That was invisibly correct while `--fg` was white; after
+the flip it inherits `#0e0e0e`, and difference-blending near-black over white
+yields `rgb(241,241,241)` — the logo became a ghost. Under `difference`, white
+is the only value that renders as the backdrop's inverse, so `nav` now declares
+`color: #fff` once and the two blend-disabled blocks reset it to `var(--fg)`.
 
 The mobile breakpoint (`max-width: 767px`) and the touch-device block, however,
 give `nav` a solid background — and difference-blending a solid white bar
@@ -169,9 +195,21 @@ visitor, so prompting them to act is misleading.
   steal is correct for a modal that waits for input; it is wrong for decorative
   chrome that leaves on its own after 2.6s. The overlay becomes `aria-hidden`
   with no focus steal. Screen-reader users get the page directly.
-- **`prefers-reduced-motion: reduce`:** the word renders already-written; the
-  overlay still auto-dismisses on the same schedule. No stroke animation, no
-  scale/transform on the fade.
+- **`prefers-reduced-motion: reduce`: the intro is skipped entirely.**
+  *Changed during implementation.* The spec originally called for the word to
+  render already-written and dismiss on the same schedule. Measuring the real
+  page killed that: the mark cannot paint until the font bundle resolves and
+  the container is measured, which lands at **~535ms**, while the hold timer
+  starts at mount (~180ms). The result was a blank white screen for half a
+  second, a ~265ms flash of `hello`, then a fade — strictly worse than nothing,
+  and worst for exactly the vestibular-sensitive users the media query exists
+  to protect. Gating the timer on actual paint would mean polling canvas pixels
+  in production code for a splash screen.
+
+  The intro is, in its entirety, an animation — and the fade is itself motion.
+  So reduced-motion visitors go straight to the site. Enforced in two places:
+  the component bails on mount, and a `@media (prefers-reduced-motion: reduce)`
+  rule hides the overlay for the pre-hydration window.
 - **JS disabled:** unchanged — the `<noscript>` rule hides the overlay.
 - **Contrast:** `--dim` at 5.4:1 and `--accent` at 4.6:1 both clear AA for
   normal text. `.outline-text` (0.15) and `.sticky-type` (0.05) are decorative
@@ -194,7 +232,8 @@ assumed.
 3. Wheel, click, and a keypress each skip the intro early.
 4. Reload in the same tab → no intro, no white flash.
 5. New tab → intro plays again.
-6. Emulated `prefers-reduced-motion` → static `hello`, still auto-dismisses.
+6. Emulated `prefers-reduced-motion` → no overlay at all, body scrollable,
+   hero visible immediately.
 7. Mobile viewport (≤767px) → nav bar is a white bar with dark links, not an
    inverted black bar.
 8. Hero `SHAIK / SUFYAAN` is legible over the washed-out photo.
